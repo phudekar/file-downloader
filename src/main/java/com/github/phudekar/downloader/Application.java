@@ -7,6 +7,7 @@ public class Application {
 
     private static DownloadManager downloadManager;
     private static CommandParser commandParser;
+    private static StringBuilder progressMessageBuffer = new StringBuilder();
 
     public static void main(String[] args) {
 
@@ -15,9 +16,10 @@ public class Application {
             @Override
             public void onProgress(DownloadEntry entry) {
                 if (entry.getStatus().isComplete()) {
+                    printProgress(entry);
                     System.out.println("\nFile downloaded successfully at " + entry.getFile().getAbsolutePath());
                 } else {
-                    printProgress(entry.getStatus());
+                    printProgress(entry);
                 }
             }
         });
@@ -27,6 +29,7 @@ public class Application {
 
         try {
             Command command = commandParser.parse(args);
+            printStartDownloadMessage(command.getUrl());
             downloadManager.download(command.getUrl(), command.getLocation());
         } catch (InvalidCommandException e) {
             System.out.println("Error: " + e.getMessage());
@@ -34,24 +37,29 @@ public class Application {
 
     }
 
-    public static void printProgress(DownloadStatus status) {
+    public static void printStartDownloadMessage(String url) {
+        System.out.println("\nDownloading from " + url);
+    }
 
-        for (int i = 0; i < 12; i++) {
+    public static void printProgress(DownloadEntry entry) {
+        DownloadStatus status = entry.getStatus();
+        for (int i = 0; i < progressMessageBuffer.length(); i++) {
             System.out.print("\b");
         }
+        progressMessageBuffer = new StringBuilder();
 
-        System.out.println("[");
+        progressMessageBuffer.append("[");
 
         for (int i = 1; i <= 10; i++) {
             if (status.getDownloadedSize() * 10 / status.getTotalSize() >= i)
-                System.out.print("=");
+                progressMessageBuffer.append("=");
             else
-                System.out.print(".");
+                progressMessageBuffer.append(".");
         }
 
-        System.out.println("]");
-
-
+        progressMessageBuffer.append("] ");
+        progressMessageBuffer.append(Math.round(status.getDownloadedSize() / 1024) + "/" + Math.round(status.getTotalSize() / 1024) + " KB");
+        System.out.print(progressMessageBuffer.toString());
     }
 
 }

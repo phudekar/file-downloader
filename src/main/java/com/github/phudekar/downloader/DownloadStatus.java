@@ -19,6 +19,6 @@ public class DownloadStatus {
     }
 
     public boolean isComplete() {
-        return getDownloadedSize() >= getTotalSize();
+        return getTotalSize() > 0 && getDownloadedSize() >= getTotalSize();
     }
 }

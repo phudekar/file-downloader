@@ -8,10 +8,10 @@ import java.util.Optional;
 public class DownloadEntry {
 
     static final String DEFAULT_FILE_NAME = "download";
-
     private final String url;
     private String location;
     private final File file;
+    private DownloadStatus status = new DownloadStatus(0, 0);
 
     public DownloadEntry(String url, String location) {
         this.url = url;
@@ -33,6 +33,14 @@ public class DownloadEntry {
 
     public File getFile() {
         return file;
+    }
+
+    public DownloadStatus getStatus() {
+        return status;
+    }
+
+    public void updateStatus(DownloadStatus status) {
+        this.status = status;
     }
 
     @Override

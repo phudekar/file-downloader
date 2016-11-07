@@ -2,8 +2,21 @@ group 'com.github.phudekar'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'application'
 
-sourceCompatibility = 1.5
+mainClassName = 'com.github.phudekar.downloader.Application'
+
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
+
+if (!hasProperty('mainClass')) {
+    ext.mainClass = 'com.github.phudekar.downloader.Application'
+}
+
+sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -12,5 +25,5 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '2.2.5'
-    testCompile group: 'com.github.tomakehurst', name:'wiremock', version:'2.2.2'
+    testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: '2.2.2'
 }

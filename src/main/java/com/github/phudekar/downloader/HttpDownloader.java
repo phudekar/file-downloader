@@ -52,7 +52,8 @@ public class HttpDownloader implements Downloader {
     }
 
     private void notifyProgress(double sizeDownloaded, double totalSize) {
-        this.progressListeners.stream().forEach(progressListener -> progressListener.onProgress(entry, new DownloadStatus(totalSize, sizeDownloaded)));
+        entry.updateStatus(new DownloadStatus(totalSize, sizeDownloaded));
+        this.progressListeners.stream().forEach(progressListener -> progressListener.onProgress(entry));
     }
 
     public void subscribeForNotification(ProgressListener progressListener) {

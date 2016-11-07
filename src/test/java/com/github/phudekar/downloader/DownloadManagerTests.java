@@ -45,16 +45,7 @@ public class DownloadManagerTests {
         DownloadEntry downloadEntry = downloadManager.download(url, location);
 
         assertThat(downloadManager.getDownloads().size(), is(1));
-        assertThat(downloadManager.getDownloads().keySet().stream().findFirst().get(), is(downloadEntry));
-    }
-
-    @Test
-    public void shouldSubscribeToProgressEventsForDownloadEntry() {
-
-        DownloadEntry downloadEntry = downloadManager.download(url, location);
-
-        verify(downloader).download(downloadEntry);
-        verify(downloader).subscribeForNotification(downloadManager);
+        assertThat(downloadManager.getDownloads().stream().findFirst().get(), is(downloadEntry));
     }
 
 }

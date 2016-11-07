@@ -11,7 +11,6 @@ import java.io.IOException;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class HttpDownloaderTests {
@@ -36,6 +35,7 @@ public class HttpDownloaderTests {
 
         stubFor(get(urlEqualTo("/" + filename))
                 .willReturn(aResponse()
+                        .withHeader("Content-Length","7")
                         .withBodyFile("test.txt")));
 
         TestProgressListener progressListener = new TestProgressListener();
@@ -43,9 +43,9 @@ public class HttpDownloaderTests {
 
         downloader.download(downloadEntry);
 
-        assertThat(progressListener.entry, is(downloadEntry));
-        assertTrue(progressListener.status.getDownloadedSize() > 0);
-        assertTrue(progressListener.status.isComplete());
+        assertThat(progressListener.getEntry(), is(downloadEntry));
+        assertTrue(downloadEntry.getStatus().getDownloadedSize() > 0);
+        assertTrue(downloadEntry.getStatus().isComplete());
 
         downloadEntry.getFile().delete();
 
@@ -74,12 +74,14 @@ public class HttpDownloaderTests {
     class TestProgressListener implements ProgressListener {
 
         private DownloadEntry entry;
-        private DownloadStatus status;
 
         @Override
-        public void onProgress(DownloadEntry entry, DownloadStatus status) {
-            this.status = status;
+        public void onProgress(DownloadEntry entry) {
             this.entry = entry;
+        }
+
+        public DownloadEntry getEntry() {
+            return entry;
         }
 
 
