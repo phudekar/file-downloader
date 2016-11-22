@@ -34,6 +34,6 @@ cd file-downloader-1.0-SNAPSHOT/bin/
 ## Run the application
 
 ```
-./file-downloader <http-url> <location>
+./file-downloader "<http-url>" <location>
 
 ```

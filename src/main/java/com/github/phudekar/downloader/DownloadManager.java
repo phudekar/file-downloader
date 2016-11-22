@@ -1,26 +1,36 @@
 package com.github.phudekar.downloader;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class DownloadManager {
 
-    final HashSet<DownloadEntry> downloads = new HashSet<>();
+    final HashMap<DownloadEntry, Future> downloads = new HashMap<>();
     private Downloader downloader;
+    ExecutorService executor = Executors.newCachedThreadPool();
 
     public DownloadManager(Downloader downloader) {
         this.downloader = downloader;
     }
 
-    public DownloadEntry download(String url, String location) {
-        DownloadEntry entry = new DownloadEntry(url, location);
-        downloads.add(entry);
-        downloader.download(entry);
-        return entry;
+    public void download(DownloadEntry entry) {
+        downloads.put(entry, executor.submit(() -> downloader.download(entry)));
     }
 
     public Set<DownloadEntry> getDownloads() {
-        return this.downloads;
+        return this.downloads.keySet();
+    }
+
+    public void pause(DownloadEntry entry) {
+        if (this.downloads.containsKey(entry))
+            this.downloads.get(entry).cancel(true);
+    }
+
+    public boolean isPaused(DownloadEntry entry) {
+        return this.downloads.containsKey(entry) && this.downloads.get(entry).isCancelled();
     }
 
 }

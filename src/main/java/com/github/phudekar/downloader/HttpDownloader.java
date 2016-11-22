@@ -23,7 +23,6 @@ public class HttpDownloader implements Downloader {
 
         try {
             HttpURLConnection connection = (HttpURLConnection) new URL(entry.getUrl()).openConnection();
-
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
 
                 long contentLength = connection.getContentLengthLong();
@@ -33,14 +32,13 @@ public class HttpDownloader implements Downloader {
                 byte[] buffer = new byte[BUFFER_SIZE];
                 int totalBytesRead = 0;
                 int bytesRead = 0;
-                while ((bytesRead = inputStream.read(buffer)) > -1) {
+                while ((bytesRead = inputStream.read(buffer)) > -1 && !Thread.currentThread().isInterrupted()) {
                     outputStream.write(buffer, 0, bytesRead);
                     totalBytesRead += bytesRead;
                     this.notifyProgress(totalBytesRead, contentLength);
                 }
 
                 connection.disconnect();
-
                 outputStream.flush();
                 outputStream.close();
             }

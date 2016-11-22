@@ -5,15 +5,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 public class DownloadManagerTests {
 
@@ -34,15 +28,17 @@ public class DownloadManagerTests {
 
     @Test
     public void shouldCreateDownloadEntryForFile() {
-        DownloadEntry downloadEntry = downloadManager.download(url, location);
+        DownloadEntry downloadEntry = new DownloadEntry(url, location);
+        downloadManager.download(downloadEntry);
 
         assertThat(downloadEntry.getUrl(), is(url));
         assertThat(downloadEntry.getFile().getPath(), is(location + "/" + fileName));
     }
 
     @Test
-    public void shouldReturnDownloadEntries(){
-        DownloadEntry downloadEntry = downloadManager.download(url, location);
+    public void shouldReturnDownloadEntries() {
+        DownloadEntry downloadEntry = new DownloadEntry(url, location);
+        downloadManager.download(downloadEntry);
 
         assertThat(downloadManager.getDownloads().size(), is(1));
         assertThat(downloadManager.getDownloads().stream().findFirst().get(), is(downloadEntry));
