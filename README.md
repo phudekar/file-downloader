@@ -1,6 +1,8 @@
 File Downloader
 ===============
 
+[![Build Status](https://travis-ci.org/phudekar/file-downloader.svg?branch=master)](https://travis-ci.org/phudekar/file-downloader)
+
 This is simple command line utility to download a file from a url.
 
 ## PRE-REQUISITES
