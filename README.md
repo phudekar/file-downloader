@@ -3,7 +3,10 @@ File Downloader
 
 [![Build Status](https://travis-ci.org/phudekar/file-downloader.svg?branch=master)](https://travis-ci.org/phudekar/file-downloader)
 
-This is simple command line utility to download a file from a url.
+This is simple command line utility to download a file from a url. 
+You can pause the active download by entering `p` and resume it by entering `r`.
+
+If there exists a file with same name on output path, it will replace that file.
 
 ## PRE-REQUISITES
 

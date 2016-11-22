@@ -14,7 +14,7 @@ public class DownloadEntryTests {
 
         DownloadEntry downloadEntry = new DownloadEntry(url, location);
 
-        assertThat(downloadEntry.getFile().getPath(), is(location + "/" + DownloadEntry.DEFAULT_FILE_NAME));
+        assertThat(downloadEntry.getFile().getPath(), is(location + "/" + DownloadEntry.DEFAULT_FILE_NAME + ".tmp"));
     }
 
 

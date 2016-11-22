@@ -27,7 +27,7 @@ public class Application {
             public void onProgress(DownloadEntry entry) {
                 if (entry.getStatus().isComplete()) {
                     printProgress(entry);
-                    System.out.println("\nFile downloaded successfully at " + entry.getFile().getAbsolutePath());
+                    System.out.println("\nFile downloaded successfully at " + entry.getLocation());
                 } else {
                     printProgress(entry);
                 }
@@ -59,12 +59,13 @@ public class Application {
 
                 if (reader.ready() && reader.read(buffer) > 0) {
                     char action = buffer[0];
-                    if (action == PAUSE) {
+                    if (action == PAUSE && !downloadManager.isPaused(entry)) {
                         downloadManager.pause(entry);
-                        System.out.println("PAUSED (Press '" + RESUME + "' to resume)");
-                    } else if (action == RESUME) {
-                        downloadManager.download(entry);
-                        clearScreen();
+                        System.out.println("Enter '" + RESUME + "' to resume.");
+                    } else if (action == RESUME && downloadManager.isPaused(entry)) {
+                        downloadManager.resume(entry);
+                        clearLine();
+
                     }
                 }
             }
@@ -77,7 +78,6 @@ public class Application {
 
     private static void printStartDownloadMessage(String url) {
         System.out.println("\nDownloading from " + url);
-        System.out.println("Press '" + PAUSE + "' to Pause and '" + RESUME + "' to resume.");
     }
 
     private static void printProgress(DownloadEntry entry) {
@@ -88,22 +88,26 @@ public class Application {
         messageBuilder = new StringBuilder();
         messageBuilder.append("[");
 
-        for (int i = 1; i <= 10; i++) {
-            if (status.getDownloadedSize() * 10 / status.getTotalSize() >= i)
+        int progressBarWidth = 20;
+        for (int i = 1; i <= progressBarWidth; i++) {
+            if (status.getDownloadedSize() * progressBarWidth / status.getTotalSize() >= i)
                 messageBuilder.append("=");
             else
                 messageBuilder.append(".");
         }
 
         messageBuilder.append("] ");
-        messageBuilder.append(Math.round(status.getDownloadedSize() / 1024) + "/" + Math.round(status.getTotalSize() / 1024) + " KB");
+        messageBuilder.append(Math.round(status.getDownloadedSize() / 1024) + "/" + Math.round(status.getTotalSize() / 1024) + " KB ");
+        messageBuilder.append("Enter '" + PAUSE + "' to pause ");
+
         System.out.print(messageBuilder.toString());
     }
 
-    private static void clearScreen() {
+    private static void clearLine() {
+        System.out.print("\033[2K"); // clear line
         for (int i = 0; i < 3; i++) {
-            System.out.print("\033[2K"); // Erase line content
-            System.out.print(String.format("\033[%dA", 1)); // Move up
+            System.out.print(String.format("\033[%dA", 1)); // move line up
+            System.out.print("\033[2K");
         }
     }
 

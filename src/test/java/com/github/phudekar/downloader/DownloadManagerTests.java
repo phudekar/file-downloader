@@ -32,7 +32,7 @@ public class DownloadManagerTests {
         downloadManager.download(downloadEntry);
 
         assertThat(downloadEntry.getUrl(), is(url));
-        assertThat(downloadEntry.getFile().getPath(), is(location + "/" + fileName));
+        assertThat(downloadEntry.getFile().getPath(), is(location + "/" + fileName + ".tmp"));
     }
 
     @Test

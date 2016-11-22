@@ -2,19 +2,19 @@ package com.github.phudekar.downloader;
 
 public class DownloadStatus {
 
-    private double totalSize;
-    private double downloadedSize;
+    private long totalSize;
+    private long downloadedSize;
 
-    public DownloadStatus(double totalSize, double downloadedSize) {
+    public DownloadStatus(long totalSize, long downloadedSize) {
         this.totalSize = totalSize;
         this.downloadedSize = downloadedSize;
     }
 
-    public double getTotalSize() {
+    public long getTotalSize() {
         return totalSize;
     }
 
-    public double getDownloadedSize() {
+    public long getDownloadedSize() {
         return downloadedSize;
     }
 

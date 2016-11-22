@@ -17,9 +17,9 @@ public class DownloadEntry {
         this.url = url;
         this.location = location;
         if (new File(location).isDirectory()) {
-            location = location + File.separator + getFileName(url);
+            this.location = location + File.separator + getFileName(url);
         }
-        this.file = new File(location);
+        this.file = new File(this.location + ".tmp");
     }
 
     private String getFileName(String url) {
@@ -35,12 +35,19 @@ public class DownloadEntry {
         return file;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
     public DownloadStatus getStatus() {
         return status;
     }
 
     public void updateStatus(DownloadStatus status) {
         this.status = status;
+        if (this.status.isComplete()) {
+            this.file.renameTo(new File(this.location));
+        }
     }
 
     @Override

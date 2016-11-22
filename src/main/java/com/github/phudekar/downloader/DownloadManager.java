@@ -17,7 +17,8 @@ public class DownloadManager {
     }
 
     public void download(DownloadEntry entry) {
-        downloads.put(entry, executor.submit(() -> downloader.download(entry)));
+        if (!downloads.containsKey(entry))
+            downloads.put(entry, executor.submit(() -> downloader.download(entry)));
     }
 
     public Set<DownloadEntry> getDownloads() {
@@ -27,6 +28,11 @@ public class DownloadManager {
     public void pause(DownloadEntry entry) {
         if (this.downloads.containsKey(entry))
             this.downloads.get(entry).cancel(true);
+    }
+
+    public void resume(DownloadEntry entry) {
+        if (downloads.containsKey(entry))
+            downloads.put(entry, executor.submit(() -> downloader.download(entry)));
     }
 
     public boolean isPaused(DownloadEntry entry) {
