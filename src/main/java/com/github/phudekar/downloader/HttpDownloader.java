@@ -16,24 +16,20 @@ public class HttpDownloader implements Downloader {
     private static final int BUFFER_SIZE = 4096;
 
     private List<ProgressListener> progressListeners = new ArrayList<>();
-    private DownloadEntry entry;
 
     @Override
     public void download(DownloadEntry entry) {
-        this.entry = entry;
-
         try {
             HttpURLConnection connection = (HttpURLConnection) new URL(entry.getUrl()).openConnection();
             long totalBytesRead = entry.getFile().length();
-            String range = "bytes=" + totalBytesRead + "-";
-            connection.setRequestProperty("Range", range);
-            
+            connection.setRequestProperty("Range", getRangeHeader(totalBytesRead));
+
             int responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_PARTIAL) {
 
                 long totalSize = totalBytesRead + connection.getContentLengthLong();
                 InputStream inputStream = connection.getInputStream();
-                FileOutputStream outputStream = new FileOutputStream(entry.getFile(),true);
+                FileOutputStream outputStream = new FileOutputStream(entry.getFile(), true);
 
                 byte[] buffer = new byte[BUFFER_SIZE];
                 int bytesRead = 0;
@@ -41,13 +37,13 @@ public class HttpDownloader implements Downloader {
                     outputStream.write(buffer, 0, bytesRead);
                     outputStream.flush();
                     totalBytesRead += bytesRead;
-                    this.notifyProgress(totalBytesRead, totalSize);
+                    this.notifyProgress(entry, totalBytesRead, totalSize);
                 }
 
                 connection.disconnect();
                 outputStream.close();
             } else {
-                throw new ConnectException("Received response " + responseCode);
+                throw new ConnectException("Could not connect. status code : " + responseCode);
             }
         } catch (MalformedURLException e) {
             throw new InvalidUrlException(entry.getUrl());
@@ -56,7 +52,11 @@ public class HttpDownloader implements Downloader {
         }
     }
 
-    private void notifyProgress(long sizeDownloaded, long totalSize) {
+    private String getRangeHeader(long offset) {
+        return "bytes=" + offset + "-";
+    }
+
+    private void notifyProgress(DownloadEntry entry, long sizeDownloaded, long totalSize) {
         entry.updateStatus(new DownloadStatus(totalSize, sizeDownloaded));
         this.progressListeners.stream().forEach(progressListener -> progressListener.onProgress(entry));
     }

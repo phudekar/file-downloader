@@ -3,17 +3,19 @@ package com.github.phudekar.downloader;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class DownloadManager {
 
+    ExecutorService executor;
+
     final HashMap<DownloadEntry, Future> downloads = new HashMap<>();
     private Downloader downloader;
-    ExecutorService executor = Executors.newCachedThreadPool();
 
-    public DownloadManager(Downloader downloader) {
+
+    public DownloadManager(Downloader downloader,ExecutorService executor) {
         this.downloader = downloader;
+        this.executor = executor;
     }
 
     public void download(DownloadEntry entry) {

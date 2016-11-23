@@ -1,9 +1,13 @@
 package com.github.phudekar.downloader;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -19,11 +23,13 @@ public class DownloadManagerTests {
     @Rule
     public WireMockRule service = new WireMockRule(8081);
     private Downloader downloader;
+    private ExecutorService executor;
 
     @Before
     public void beforeEach() {
         downloader = mock(Downloader.class);
-        downloadManager = new DownloadManager(downloader);
+        executor = Executors.newCachedThreadPool();
+        downloadManager = new DownloadManager(downloader, executor);
     }
 
     @Test
@@ -42,6 +48,12 @@ public class DownloadManagerTests {
 
         assertThat(downloadManager.getDownloads().size(), is(1));
         assertThat(downloadManager.getDownloads().stream().findFirst().get(), is(downloadEntry));
+    }
+
+    @After
+    public void afterEach() {
+        if (!executor.isShutdown())
+            executor.shutdownNow();
     }
 
 }
