@@ -29,6 +29,10 @@ public class ConsoleInput {
 
             reader.close();
             onComplete.run();
+
+            if(entry.getStatus().hasFailed())
+                System.exit(1);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
