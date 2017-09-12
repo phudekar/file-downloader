@@ -5,3 +5,5 @@ logs
 *.log
 *.iml
 problem.txt
+*-SNAPSHOT
+test.txt

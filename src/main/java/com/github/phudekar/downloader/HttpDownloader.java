@@ -1,11 +1,11 @@
 package com.github.phudekar.downloader;
 
 import com.github.phudekar.downloader.exceptions.InvalidUrlException;
+import com.github.phudekar.downloader.exceptions.UnexpectedResponseException;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,17 +20,33 @@ public class HttpDownloader implements Downloader {
     @Override
     public void download(DownloadEntry entry) {
         try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(entry.getUrl()).openConnection();
+            downloadFromUrl(entry, entry.getUrl());
+        } catch (UnexpectedResponseException e) {
+            if (e.getResponseCode() == 302 || e.getResponseCode() == 301) {
+                try {
+                    System.out.println("Received 302. Trying again with " + e.getLocation());
+                    downloadFromUrl(entry, e.getLocation());
+                } catch (UnexpectedResponseException e1) {
+                   System.out.println("Could not download file from : " + e.getLocation());
+                }
+            }
+        }
+    }
+
+    private void downloadFromUrl(DownloadEntry entry, String url) throws UnexpectedResponseException {
+        HttpURLConnection connection = null;
+        FileOutputStream outputStream = null;
+
+        try {
+            connection = (HttpURLConnection) new URL(url).openConnection();
             long totalBytesRead = entry.getFile().length();
             connection.setRequestProperty("Range", getRangeHeader(totalBytesRead));
-
             int responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_PARTIAL) {
 
                 long totalSize = totalBytesRead + connection.getContentLengthLong();
                 InputStream inputStream = connection.getInputStream();
-                FileOutputStream outputStream = new FileOutputStream(entry.getFile(), true);
-
+                outputStream = new FileOutputStream(entry.getFile(), true);
                 byte[] buffer = new byte[BUFFER_SIZE];
                 int bytesRead = 0;
                 while ((bytesRead = inputStream.read(buffer)) > -1 && !Thread.currentThread().isInterrupted()) {
@@ -40,15 +56,23 @@ public class HttpDownloader implements Downloader {
                     this.notifyProgress(entry, totalBytesRead, totalSize);
                 }
 
-                connection.disconnect();
-                outputStream.close();
             } else {
-                throw new ConnectException("Could not connect. status code : " + responseCode);
+                throw new UnexpectedResponseException(responseCode, connection.getHeaderField("Location"));
             }
         } catch (MalformedURLException e) {
             throw new InvalidUrlException(entry.getUrl());
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Failed to download file. " + e.getMessage());
+        } finally {
+            if (connection != null)
+                connection.disconnect();
+
+            if (outputStream != null)
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
     }
 
