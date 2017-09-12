@@ -18,22 +18,29 @@ public class HttpDownloader implements Downloader {
     private List<ProgressListener> progressListeners = new ArrayList<>();
 
     @Override
-    public void download(DownloadEntry entry) {
+    public void download(DownloadEntry entry) throws IOException {
         try {
             downloadFromUrl(entry, entry.getUrl());
         } catch (UnexpectedResponseException e) {
             if (e.getResponseCode() == 302 || e.getResponseCode() == 301) {
                 try {
-                    System.out.println("Received 302. Trying again with " + e.getLocation());
+//                    System.out.println("Received 302. Trying again with " + e.getLocation());
                     downloadFromUrl(entry, e.getLocation());
                 } catch (UnexpectedResponseException e1) {
-                   System.out.println("Could not download file from : " + e.getLocation());
+                    onError(entry, "Could not download file from : " + e.getLocation());
                 }
+            } else {
+                onError(entry, "Could not download file. Received respose code: " + e.getResponseCode());
             }
         }
     }
 
-    private void downloadFromUrl(DownloadEntry entry, String url) throws UnexpectedResponseException {
+    private void onError(DownloadEntry entry, String message) {
+        System.out.println(message);
+        entry.getStatus().failed();
+    }
+
+    private void downloadFromUrl(DownloadEntry entry, String url) throws UnexpectedResponseException, IOException {
         HttpURLConnection connection = null;
         FileOutputStream outputStream = null;
 
@@ -62,7 +69,7 @@ public class HttpDownloader implements Downloader {
         } catch (MalformedURLException e) {
             throw new InvalidUrlException(entry.getUrl());
         } catch (IOException e) {
-            System.out.println("Failed to download file. " + e.getMessage());
+            throw e;
         } finally {
             if (connection != null)
                 connection.disconnect();
