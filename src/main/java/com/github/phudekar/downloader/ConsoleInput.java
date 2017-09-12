@@ -14,7 +14,7 @@ public class ConsoleInput {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             char[] buffer = new char[1];
 
-            while (!entry.getStatus().isComplete()) {
+            while (!(entry.getStatus().isComplete() || entry.getStatus().hasFailed())) {
                 if (reader.ready() && reader.read(buffer) > 0) {
                     char action = buffer[0];
                     if (action == PAUSE && !downloadManager.isPaused(entry)) {

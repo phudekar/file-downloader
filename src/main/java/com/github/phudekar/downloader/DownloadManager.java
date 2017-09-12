@@ -1,5 +1,6 @@
 package com.github.phudekar.downloader;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -13,14 +14,20 @@ public class DownloadManager {
     private Downloader downloader;
 
 
-    public DownloadManager(Downloader downloader,ExecutorService executor) {
+    public DownloadManager(Downloader downloader, ExecutorService executor) {
         this.downloader = downloader;
         this.executor = executor;
     }
 
     public void download(DownloadEntry entry) {
         if (!downloads.containsKey(entry))
-            downloads.put(entry, executor.submit(() -> downloader.download(entry)));
+            downloads.put(entry, executor.submit(() -> {
+                try {
+                    downloader.download(entry);
+                } catch (IOException e) {
+                  onError(entry, e.getMessage());
+                }
+            }));
     }
 
     public Set<DownloadEntry> getDownloads() {
@@ -34,11 +41,21 @@ public class DownloadManager {
 
     public void resume(DownloadEntry entry) {
         if (downloads.containsKey(entry))
-            downloads.put(entry, executor.submit(() -> downloader.download(entry)));
+            downloads.put(entry, executor.submit(() -> {
+                try {
+                    downloader.download(entry);
+                } catch (IOException e) {
+                    onError(entry, e.getMessage());
+                }
+            }));
     }
 
     public boolean isPaused(DownloadEntry entry) {
         return this.downloads.containsKey(entry) && this.downloads.get(entry).isCancelled();
     }
 
+    private void onError(DownloadEntry entry, String message){
+        System.out.println("Failed to download file. " + message);
+        entry.getStatus().failed();
+    }
 }

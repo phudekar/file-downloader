@@ -67,4 +67,5 @@ public class DownloadEntry {
         result = 31 * result + location.hashCode();
         return result;
     }
+
 }
